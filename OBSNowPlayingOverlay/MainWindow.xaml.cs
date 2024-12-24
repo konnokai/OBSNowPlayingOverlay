@@ -1,5 +1,4 @@
 ﻿using ImageMagick;
-using OBSNowPlayingOverlay.TwitchBot;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -26,7 +25,6 @@ namespace OBSNowPlayingOverlay
     public partial class MainWindow : Window
     {
         public static BlockingCollection<NowPlayingJson> MsgQueue { get; } = new();
-        public static Bot TwitchBot { get; private set; } = new();
         public static string LatestWebSocketGuid { get; set; } = "";
         public static string NowPlayingTitle { get; private set; } = "";
         public static string NowPlayingUrl { get; private set; } = "";

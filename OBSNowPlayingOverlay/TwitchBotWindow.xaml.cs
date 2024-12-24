@@ -50,7 +50,7 @@ namespace OBSNowPlayingOverlay
                 txt_UserLogin.Text = _twitchBotConfig.UserLogin;
             });
 
-            if (MainWindow.TwitchBot.IsConnect.HasValue && MainWindow.TwitchBot.IsConnect.Value)
+            if (TwitchBot.Bot.IsConnect.HasValue && TwitchBot.Bot.IsConnect.Value)
             {
                 btn_StopBot.Dispatcher.Invoke(() =>
                 {
@@ -220,12 +220,12 @@ namespace OBSNowPlayingOverlay
             {
             }
 
-            MainWindow.TwitchBot.SetBotCred(SettingWindow.TwitchBotConfig.AccessToken, accessTokenResponse.Login);
+            TwitchBot.Bot.SetBotCred(SettingWindow.TwitchBotConfig.AccessToken, accessTokenResponse.Login);
         }
 
         private void btn_StartBot_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.TwitchBot.StartBot();
+            TwitchBot.Bot.StartBot();
 
             btn_StartBot.Dispatcher.Invoke(() =>
             {
@@ -243,7 +243,7 @@ namespace OBSNowPlayingOverlay
 
         private void btn_StopBot_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.TwitchBot.StopBot();
+            TwitchBot.Bot.StopBot();
 
             btn_StartBot.Dispatcher.Invoke(() =>
             {

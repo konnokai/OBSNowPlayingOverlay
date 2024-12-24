@@ -8,16 +8,16 @@ using TwitchLib.Communication.Models;
 
 namespace OBSNowPlayingOverlay.TwitchBot
 {
-    public class Bot
+    public static class Bot
     {
-        public bool? IsConnect { get { return client?.IsConnected; } }
+        public static bool? IsConnect { get { return client?.IsConnected; } }
 
-        private TwitchClient? client = null;
-        private DateTime latestNPCommandExecuteTime = DateTime.MinValue;
+        private static TwitchClient? client = null;
+        private static DateTime latestNPCommandExecuteTime = DateTime.MinValue;
 
-        private readonly string[] _musicCommandArray = new[] { "music", "playing", "np", "nowplaying", "正在播放", "音樂" };
+        private static readonly string[] _musicCommandArray = new[] { "music", "playing", "np", "nowplaying", "正在播放", "音樂" };
 
-        public void SetBotCred(string accessToken, string userLogin)
+        public static void SetBotCred(string accessToken, string userLogin)
         {
             var credentials = new ConnectionCredentials(userLogin, accessToken);
             var clientOptions = new ClientOptions
@@ -35,13 +35,13 @@ namespace OBSNowPlayingOverlay.TwitchBot
             client.OnChatCommandReceived += client_OnChatCommandReceived;
         }
 
-        public void StartBot()
+        public static void StartBot()
         {
             Console.WriteLine("Twitch Bot 連線中...");
             client?.Connect();
         }
 
-        public void StopBot()
+        public static void StopBot()
         {
             if (client != null)
             {
@@ -54,9 +54,11 @@ namespace OBSNowPlayingOverlay.TwitchBot
             }
 
             client = null;
+
+            Console.WriteLine("Twitch Bot 已離線");
         }
 
-        private void client_OnChatCommandReceived(object? sender, OnChatCommandReceivedArgs e)
+        private static void client_OnChatCommandReceived(object? sender, OnChatCommandReceivedArgs e)
         {
             // 每 30 秒觸發一次指令
             if (_musicCommandArray.Contains(e.Command.CommandText.Trim()) && DateTime.Now.Subtract(latestNPCommandExecuteTime).TotalSeconds >= 30)
@@ -70,12 +72,12 @@ namespace OBSNowPlayingOverlay.TwitchBot
             }
         }
 
-        private void client_OnConnected(object? sender, OnConnectedArgs e)
+        private static void client_OnConnected(object? sender, OnConnectedArgs e)
         {
             Console.WriteLine($"Twitch Bot 已連線到 IRC");
         }
 
-        private void client_OnJoinedChannel(object? sender, OnJoinedChannelArgs e)
+        private static void client_OnJoinedChannel(object? sender, OnJoinedChannelArgs e)
         {
             AnsiConsole.MarkupLineInterpolated($"Twitch Bot 已連線到頻道: [green]{e.Channel}[/]");
         }

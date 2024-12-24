@@ -9,12 +9,12 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
     public class NowPlaying : WebSocketSharp.Server.WebSocketBehavior
     {
         private readonly static ConcurrentDictionary<string, WebSocketClientInfo> _clientDict = new();
-        readonly Regex _wsMsgRegex = new(@"(?<Type>\S+) - (?<SiteName>\S+) \((?<Guid>[^)]+)\)");
-        private readonly Timer clientActivityTimer;
+        private readonly Regex _wsMsgRegex = new(@"(?<Type>\S+) - (?<SiteName>\S+) \((?<Guid>[^)]+)\)");
+        private readonly Timer _clientActivityTimer;
 
         public NowPlaying()
         {
-            clientActivityTimer = new Timer(CheckClientActivity, null, 0, 3000);
+            _clientActivityTimer = new Timer(CheckClientActivity, null, 0, 3000);
         }
 
         private static void CheckClientActivity(object? state)
@@ -41,6 +41,14 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
             else
             {
                 MainWindow.LatestWebSocketGuid = string.Empty;
+            }
+        }
+
+        internal static void AddWebSocketClient(string guid)
+        {
+            if (!_clientDict.ContainsKey(guid))
+            {
+                _clientDict.TryAdd(guid, new WebSocketClientInfo(guid));
             }
         }
 
@@ -95,14 +103,12 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
                     {
                         AnsiConsole.MarkupLineInterpolated($"連線狀態變更: [springgreen4]新連線[/] | [yellow4_1]{match.Groups["SiteName"]}[/] | [purple4_1]{guid}[/]");
 
-                        if (!_clientDict.ContainsKey(guid))
-                        {
-                            _clientDict.TryAdd(guid, new WebSocketClientInfo(guid));
-                        }
+                        AddWebSocketClient(guid);
                     }
                     else if (match.Groups["Type"].ToString() == "closed")
                     {
                         AnsiConsole.MarkupLineInterpolated($"連線狀態變更: [orangered1]已關閉[/] | [yellow4_1]{match.Groups["SiteName"]}[/] | [purple4_1]{guid}[/]");
+
                         _clientDict.TryRemove(guid, out _);
 
                         if (MainWindow.LatestWebSocketGuid == guid)
