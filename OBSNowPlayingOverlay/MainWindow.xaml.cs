@@ -28,6 +28,7 @@ namespace OBSNowPlayingOverlay
         public static string LatestWebSocketGuid { get; set; } = "";
         public static string NowPlayingTitle { get; private set; } = "";
         public static string NowPlayingUrl { get; private set; } = "";
+        public static bool IsUseBlackAsTitleColor { get; set; } = false;
 
         private readonly HttpClient _httpClient;
         private string latestTitle = "";
@@ -62,10 +63,7 @@ namespace OBSNowPlayingOverlay
                         await UpdateNowPlayingDataAsync(data);
                     }
                 }
-                catch (Exception ex)
-                {
-                    AnsiConsole.WriteException(ex);
-                }
+                catch (Exception) { }
             });
         }
 
@@ -118,119 +116,139 @@ namespace OBSNowPlayingOverlay
                 rb_Title.Dispatcher.Invoke(() => { rb_Title.Content = nowPlayingJson.Title; });
                 rb_Subtitle.Dispatcher.Invoke(() => { rb_Subtitle.Content = artists; });
 
-                try
+                if (!string.IsNullOrEmpty(nowPlayingJson.Cover) && nowPlayingJson.Platform != "obs")
                 {
-                    AnsiConsole.MarkupLineInterpolated($"下載封面: [green]{nowPlayingJson.Cover}[/]");
-
-                    // 因 YouTube 開始將圖片轉換成 avif，故先使用 MagickImage 讀取圖片並轉換成 jpeg
-                    // https://github.com/dlemstra/Magick.NET/blob/main/docs/ConvertImage.md
-                    using var magickImage = new MagickImage(await _httpClient.GetStreamAsync(nowPlayingJson.Cover));
-                    magickImage.Format = MagickFormat.Jpeg;
-
-                    using var imageStream = new MemoryStream(magickImage.ToByteArray());
-                    using var image = await Image.LoadAsync<Rgba32>(imageStream);
-                    using var coverImage = image.Clone();
-
-                    // 若圖片非正方形才進行裁切
-                    if (coverImage.Width != coverImage.Height)
+                    try
                     {
-                        // 將圖片從正中間裁切
-                        // 若圖片的寬比較大，就由寬來裁切
-                        if (coverImage.Width > coverImage.Height)
-                        {
-                            int x = coverImage.Width / 2 - coverImage.Height / 2;
-                            coverImage.Mutate(i => i
-                                .Crop(new Rectangle(x, 0, coverImage.Height, coverImage.Height)));
-                        }
-                        else
-                        {
-                            int y = coverImage.Height / 2 - coverImage.Width / 2;
-                            coverImage.Mutate(i => i
-                                .Crop(new Rectangle(0, y, coverImage.Width, coverImage.Width)));
-                        }
-                    }
+                        AnsiConsole.MarkupLineInterpolated($"下載封面: [green]{nowPlayingJson.Cover}[/]");
 
-                    // 設定封面圖片
-                    img_Cover.Dispatcher.Invoke(() =>
-                    {
-                        img_Cover.Source = GetBMP(coverImage);
-                    });
+                        // 因 YouTube 開始將圖片轉換成 avif，故先使用 MagickImage 讀取圖片並轉換成 jpeg
+                        // https://github.com/dlemstra/Magick.NET/blob/main/docs/ConvertImage.md
+                        using var magickImage = new MagickImage(await _httpClient.GetStreamAsync(nowPlayingJson.Cover));
+                        magickImage.Format = MagickFormat.Jpeg;
 
-                    if (isUseCoverImageAsBackground)
-                    {
-                        // 將圖片模糊化
-                        image.Mutate(x => x.GaussianBlur(12));
+                        using var imageStream = new MemoryStream(magickImage.ToByteArray());
+                        using var image = await Image.LoadAsync<Rgba32>(imageStream);
+                        using var coverImage = image.Clone();
 
-                        bg.Dispatcher.Invoke(() =>
+                        // 若圖片非正方形才進行裁切
+                        if (coverImage.Width != coverImage.Height)
                         {
-                            bg.Background = new ImageBrush()
+                            // 將圖片從正中間裁切
+                            // 若圖片的寬比較大，就由寬來裁切
+                            if (coverImage.Width > coverImage.Height)
                             {
-                                ImageSource = GetBMP(image),
-                                Stretch = Stretch.UniformToFill
-                            };
-                        });
-
-                        // 將圖片縮放，以提高計算效率，並灰階化
-                        image.Mutate(x => x.Resize(128, 0).Grayscale());
-
-                        // 計算縮放後圖片的平均亮度
-                        double totalBrightness = 0;
-                        int width = image.Width;
-                        int height = image.Height;
-
-                        for (int y = 0; y < height; y++)
-                        {
-                            for (int x = 0; x < width; x++)
+                                int x = coverImage.Width / 2 - coverImage.Height / 2;
+                                coverImage.Mutate(i => i
+                                    .Crop(new Rectangle(x, 0, coverImage.Height, coverImage.Height)));
+                            }
+                            else
                             {
-                                // 使用 indexer 獲取像素
-                                Rgba32 pixel = image[x, y];
-                                double brightness = (pixel.R + pixel.G + pixel.B) / 3.0;
-                                totalBrightness += brightness;
+                                int y = coverImage.Height / 2 - coverImage.Width / 2;
+                                coverImage.Mutate(i => i
+                                    .Crop(new Rectangle(0, y, coverImage.Width, coverImage.Width)));
                             }
                         }
 
-                        grayLevel = Math.Round((totalBrightness / (width * height)), 2);
-                    }
-                    else
-                    {
-                        // 取得圖片的主要顏色
-                        // https://gist.github.com/JimBobSquarePants/12e0ef5d904d03110febea196cf1d6ee
-                        image.Mutate(x => x
-                            // Scale the image down preserving the aspect ratio. This will speed up quantization.
-                            // We use nearest neighbor as it will be the fastest approach.
-                            .Resize(new ResizeOptions() { Sampler = KnownResamplers.NearestNeighbor, Size = new SixLabors.ImageSharp.Size(128, 0) })
-                            // Reduce the color palette to 1 color without dithering.
-                            .Quantize(new OctreeQuantizer(new QuantizerOptions { MaxColors = 1 })));
-
-                        // 設定背景顏色
-                        var color = image[0, 0];
-                        bg.Dispatcher.Invoke(() =>
+                        // 設定封面圖片
+                        img_Cover.Dispatcher.Invoke(() =>
                         {
-                            bg.Background = new SolidColorBrush(Color.FromArgb(color.A, color.R, color.G, color.B));
+                            img_Cover.Source = GetBMP(coverImage);
                         });
 
-                        grayLevel = Math.Round((color.R + color.G + color.B) / 3d, 2);
+                        if (isUseCoverImageAsBackground)
+                        {
+                            // 將圖片模糊化
+                            image.Mutate(x => x.GaussianBlur(12));
+
+                            bg.Dispatcher.Invoke(() =>
+                            {
+                                bg.Background = new ImageBrush()
+                                {
+                                    ImageSource = GetBMP(image),
+                                    Stretch = Stretch.UniformToFill
+                                };
+                            });
+
+                            // 將圖片縮放，以提高計算效率，並灰階化
+                            image.Mutate(x => x.Resize(128, 0).Grayscale());
+
+                            // 計算縮放後圖片的平均亮度
+                            double totalBrightness = 0;
+                            int width = image.Width;
+                            int height = image.Height;
+
+                            for (int y = 0; y < height; y++)
+                            {
+                                for (int x = 0; x < width; x++)
+                                {
+                                    // 使用 indexer 獲取像素
+                                    Rgba32 pixel = image[x, y];
+                                    double brightness = (pixel.R + pixel.G + pixel.B) / 3.0;
+                                    totalBrightness += brightness;
+                                }
+                            }
+
+                            grayLevel = Math.Round((totalBrightness / (width * height)), 2);
+                        }
+                        else
+                        {
+                            // 取得圖片的主要顏色
+                            // https://gist.github.com/JimBobSquarePants/12e0ef5d904d03110febea196cf1d6ee
+                            image.Mutate(x => x
+                                // Scale the image down preserving the aspect ratio. This will speed up quantization.
+                                // We use nearest neighbor as it will be the fastest approach.
+                                .Resize(new ResizeOptions() { Sampler = KnownResamplers.NearestNeighbor, Size = new SixLabors.ImageSharp.Size(128, 0) })
+                                // Reduce the color palette to 1 color without dithering.
+                                .Quantize(new OctreeQuantizer(new QuantizerOptions { MaxColors = 1 })));
+
+                            // 設定背景顏色
+                            var color = image[0, 0];
+                            bg.Dispatcher.Invoke(() =>
+                            {
+                                bg.Background = new SolidColorBrush(Color.FromArgb(color.A, color.R, color.G, color.B));
+                            });
+
+                            grayLevel = Math.Round((color.R + color.G + color.B) / 3d, 2);
+                        }
+
+                        AnsiConsole.MarkupLineInterpolated($"封面灰階等級: [green]{grayLevel}[/]");
+
+                        // 取得圖片是否為亮色系
+                        var isLightBackground = grayLevel >= 128;
+
+                        // SolidColorBrush 不可在與 DispatcherObject 不同的執行緒上建立，所以只能用這種很醜的方式來寫
+                        // https://stackoverflow.com/a/8010725/15800522
+                        rb_Title.Dispatcher.Invoke(() => { rb_Title.Foreground = new SolidColorBrush(isLightBackground ? Color.FromRgb(0, 0, 0) : Color.FromRgb(255, 255, 255)); });
+                        rb_Subtitle.Dispatcher.Invoke(() => { rb_Subtitle.Foreground = new SolidColorBrush(isLightBackground ? Color.FromRgb(0, 0, 0) : Color.FromRgb(255, 255, 255)); });
+
+                        // 根據灰階等級來設定字的顏色，但效果有點不好，暫時作罷
+                        //var colorLevel = (byte)(255d - grayLevel);
+                        //rb_Title.Dispatcher.Invoke(() => { rb_Title.Foreground = new SolidColorBrush(Color.FromRgb(colorLevel, colorLevel, colorLevel)); });
+                        //rb_Subtitle.Dispatcher.Invoke(() => { rb_Subtitle.Foreground = new SolidColorBrush(Color.FromRgb(colorLevel, colorLevel, colorLevel)); });
                     }
-
-                    AnsiConsole.MarkupLineInterpolated($"封面灰階等級: [green]{grayLevel}[/]");
-
-                    // 取得圖片是否為亮色系
-                    var isLightBackground = grayLevel >= 128;
-
-                    // SolidColorBrush 不可在與 DispatcherObject 不同的執行緒上建立，所以只能用這種很醜的方式來寫
-                    // https://stackoverflow.com/a/8010725/15800522
-                    rb_Title.Dispatcher.Invoke(() => { rb_Title.Foreground = new SolidColorBrush(isLightBackground ? Color.FromRgb(0, 0, 0) : Color.FromRgb(255, 255, 255)); });
-                    rb_Subtitle.Dispatcher.Invoke(() => { rb_Subtitle.Foreground = new SolidColorBrush(isLightBackground ? Color.FromRgb(0, 0, 0) : Color.FromRgb(255, 255, 255)); });
-
-                    // 根據灰階等級來設定字的顏色，但效果有點不好，暫時作罷
-                    //var colorLevel = (byte)(255d - grayLevel);
-                    //rb_Title.Dispatcher.Invoke(() => { rb_Title.Foreground = new SolidColorBrush(Color.FromRgb(colorLevel, colorLevel, colorLevel)); });
-                    //rb_Subtitle.Dispatcher.Invoke(() => { rb_Subtitle.Foreground = new SolidColorBrush(Color.FromRgb(colorLevel, colorLevel, colorLevel)); });
+                    catch (Exception ex)
+                    {
+                        AnsiConsole.MarkupLine("[red]封面圖下載失敗，可能是找不到圖片或圖片解析錯誤[/]");
+                        AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    AnsiConsole.MarkupLine("[red]封面圖下載失敗，可能是找不到圖片或圖片解析錯誤[/]");
-                    AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+                    // 設定封面圖片為空
+                    img_Cover.Dispatcher.Invoke(() =>
+                    {
+                        img_Cover.Source = null;
+                    });
+
+                    // 設定背景顏色為透明
+                    bg.Dispatcher.Invoke(() =>
+                    {
+                        bg.Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
+                    });
+
+                    // 設定標題字體顏色為黑色
+                    rb_Title.Dispatcher.Invoke(() => { rb_Title.Foreground = IsUseBlackAsTitleColor ? new SolidColorBrush(Color.FromRgb(0, 0, 0)) : new SolidColorBrush(Color.FromRgb(255, 255, 255)); });
                 }
             }
 
@@ -251,6 +269,9 @@ namespace OBSNowPlayingOverlay
                         break;
                     case "bilibili":
                         progressColor = Color.FromRgb(0, 174, 236);
+                        break;
+                    case "obs":
+                        progressColor = Color.FromRgb(42, 130, 218);
                         break;
                 }
             }

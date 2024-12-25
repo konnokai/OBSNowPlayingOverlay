@@ -19,6 +19,7 @@ namespace OBSNowPlayingOverlay
         private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             AnsiConsole.WriteException(e.Exception);
+            e.Handled = true;
         }
     }
 }

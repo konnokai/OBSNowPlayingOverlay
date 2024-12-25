@@ -6,9 +6,10 @@
         xmlns:local="clr-namespace:OBSNowPlayingOverlay"
         xmlns:hc="https://handyorg.github.io/handycontrol" x:Class="OBSNowPlayingOverlay.SettingWindow"
         mc:Ignorable="d"
-        Title="正在播放 - 設定視窗" Height="240" Width="450" Closing="Window_Closing" MinHeight="160" MinWidth="450" WindowStartupLocation="CenterScreen">
+        Title="正在播放 - 設定視窗" Height="290" Width="450" Closing="Window_Closing" MinHeight="290" MinWidth="450" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="50"/>
@@ -46,5 +47,6 @@
         <hc:NumericUpDown x:Name="num_MarqueeSpeed" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Maximum="200" Minimum="25" Value="50" Grid.ColumnSpan="1" ValueChanged="num_MarqueeSpeed_ValueChanged" Increment="5"/>
         <CheckBox x:Name="chkb_TopMost" Grid.Column="2" Content="將主視窗置頂至最上層" Margin="10,0,10,0" Grid.Row="2" Grid.ColumnSpan="2" Click="chkb_TopMost_Click"/>
         <Button x:Name="btn_TwitchBotSetting" Content="Twitch Bot 設定" Grid.Row="3" Grid.ColumnSpan="4" HorizontalAlignment="Stretch" Margin="10,0,10,0" Click="btn_TwitchBotSetting_Click"/>
+        <Button x:Name="btn_OBSWebSocketSetting" Content="OBS WebSocket 設定" Grid.Row="4" Grid.ColumnSpan="4" HorizontalAlignment="Stretch" Margin="10,0,10,0" Click="btn_OBSWebSocketSetting_Click"/>
     </Grid>
 </Window>

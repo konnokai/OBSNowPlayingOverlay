@@ -25,23 +25,6 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
             {
                 client.Value.IsPlaying = false;
             }
-
-            // 更新最新的播放 Client
-            if (_clientDict.TryGetValue(MainWindow.LatestWebSocketGuid, out var clientInfo))
-            {
-                if (clientInfo.IsPlaying)
-                {
-                    MainWindow.LatestWebSocketGuid = clientInfo.Guid;
-                }
-                else
-                {
-                    MainWindow.LatestWebSocketGuid = string.Empty;
-                }
-            }
-            else
-            {
-                MainWindow.LatestWebSocketGuid = string.Empty;
-            }
         }
 
         internal static void AddWebSocketClient(string guid)
@@ -50,6 +33,11 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
             {
                 _clientDict.TryAdd(guid, new WebSocketClientInfo(guid));
             }
+        }
+
+        internal static void RemoveWebSocketClient(string guid)
+        {
+            _clientDict.TryRemove(guid, out _);
         }
 
         protected override void OnError(ErrorEventArgs e)
@@ -76,23 +64,7 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
                 {
                     NowPlayingJson nowPlaying = JsonConvert.DeserializeObject<NowPlayingJson>(e.Data)!;
 
-                    // Find the client in the list or create a new one
-                    if (!_clientDict.TryGetValue(nowPlaying.Guid, out var client))
-                    {
-                        client = new WebSocketClientInfo(nowPlaying.Guid);
-                        _clientDict.TryAdd(nowPlaying.Guid, client);
-                    }
-
-                    client.LastActiveTime = DateTime.Now;
-                    client.IsPlaying = nowPlaying.Status == "playing";
-
-                    // If this client is the only one playing, set it as the latest
-                    if (_clientDict.Count(c => c.Value.IsPlaying) == 1)
-                    {
-                        MainWindow.LatestWebSocketGuid = client.Guid;
-                    }
-
-                    MainWindow.MsgQueue.TryAdd(nowPlaying);
+                    ProcessNowPlayingData(nowPlaying);
                 }
                 else if (_wsMsgRegex.IsMatch(e.Data))
                 {
@@ -124,10 +96,46 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
             }
             catch (OperationCanceledException) { }
             catch (InvalidOperationException) { }
+            catch (JsonSerializationException jsonEx)
+            {
+                AnsiConsole.MarkupLineInterpolated($"Json 解析失敗: [olive]{e.Data}[/]");
+                AnsiConsole.WriteException(jsonEx, ExceptionFormats.Default);
+            }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLineInterpolated($"[olive]{e.Data}[/]");
                 AnsiConsole.WriteException(ex, ExceptionFormats.Default);
+            }
+        }
+
+        internal static void ProcessNowPlayingData(NowPlayingJson nowPlaying)
+        {
+            // Find the client in the list or create a new one
+            if (!_clientDict.TryGetValue(nowPlaying.Guid, out var client))
+            {
+                client = new WebSocketClientInfo(nowPlaying.Guid);
+                _clientDict.TryAdd(nowPlaying.Guid, client);
+            }
+
+            client.LastActiveTime = DateTime.Now;
+            client.IsPlaying = nowPlaying.Status == "playing";
+
+            // If this client is the only one playing, set it as the latest
+            // 當有兩個來源在播放時，若其中一個來源暫停，會導致條件成立
+            // 且會短暫的讓 LatestWebSocketGuid 設定為被暫停的來源，之後才會從原本持續播放的來源繼續顯示狀態
+            // 所以這邊多加個 IsPlaying 判定來確保真的是這個 client 正在播放，避免資料錯誤
+            if (_clientDict.Count(c => c.Value.IsPlaying) == 1 && client.IsPlaying)
+            {
+                MainWindow.LatestWebSocketGuid = client.Guid;
+            }
+
+            try
+            {
+                MainWindow.MsgQueue.TryAdd(nowPlaying);
+            }
+            catch (Exception)
+            {
+                // 也許是已經被標記為已完成，忽略
             }
         }
     }
