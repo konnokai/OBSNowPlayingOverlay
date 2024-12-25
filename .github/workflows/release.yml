@@ -30,7 +30,7 @@ jobs:
     - name: Create zip package
       run: |
         cd ./OBSNowPlayingOverlay/bin/x64/Release/net6.0-windows/win-x64/publish
-        Compress-Archive * ../../../../OBSNowPlayingOverlay.zip
+        Compress-Archive * ../../../OBSNowPlayingOverlay.zip
       shell: pwsh
 
     - name: Generate Changelog
@@ -47,5 +47,5 @@ jobs:
       with:
         tag_name: ${{ github.ref_name }}
         draft: true
-        files: "./OBSNowPlayingOverlay/bin/Release/OBSNowPlayingOverlay.zip"
+        files: "./OBSNowPlayingOverlay/bin/x64/Release/OBSNowPlayingOverlay.zip"
         body: ${{ steps.changelog.outputs.changelog }}
