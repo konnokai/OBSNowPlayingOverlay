@@ -26,7 +26,6 @@ namespace OBSNowPlayingOverlay
         private readonly ObservableCollection<KeyValuePair<string, FontFamily>> _fontFamilies = new();
 
         private WebSocketServer? _wsServer;
-        private readonly TaskCompletionSource<bool> _updateCheckTask = new();
 
         public SettingWindow()
         {
@@ -46,7 +45,7 @@ namespace OBSNowPlayingOverlay
                     else if (e.IsUpdateAvailable)
                     {
                         AnsiConsole.MarkupLine("檢查更新: [green]發現更新![/]");
-                        AutoUpdater.ShowUpdateForm(e);
+                        Dispatcher.Invoke(() => AutoUpdater.ShowUpdateForm(e));
                     }
                     else
                     {
@@ -54,7 +53,7 @@ namespace OBSNowPlayingOverlay
                     }
                 };
 
-                AutoUpdater.Start("https://raw.githubusercontent.com/konnokai/OBSNowPlayingOverlay/refs/heads/master/Docs/Update.xml");
+                Task.Run(() => AutoUpdater.Start("https://raw.githubusercontent.com/konnokai/OBSNowPlayingOverlay/refs/heads/master/Docs/Update.xml"));
             }
             catch (Exception ex)
             {
@@ -155,6 +154,8 @@ namespace OBSNowPlayingOverlay
             {
                 num_MarqueeSpeed.Value = _config.MarqueeSpeed;
             });
+
+            MainWindow.IsUseBlackAsTitleColor = _config.OBSUseBlackAsTitleColor;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -162,6 +163,16 @@ namespace OBSNowPlayingOverlay
             _mainWindow.Close();
             _wsServer?.Stop();
             _wsServer = null;
+
+            if (TwitchBot.Bot.IsConnect != null && TwitchBot.Bot.IsConnect.Value)
+            {
+                TwitchBot.Bot.StopBot();
+            }
+
+            if (OBSWebSocket.Client.IsConnected)
+            {
+                OBSWebSocket.Client.Disconnect();
+            }
 
             try
             {
@@ -290,8 +301,24 @@ namespace OBSNowPlayingOverlay
 
         private void btn_TwitchBotSetting_Click(object sender, RoutedEventArgs e)
         {
+            // 先關閉主視窗的置頂，避免 TwitchBotWindow 被遮蔽
+            _mainWindow.SetTopmost(false);
+
             var twitchBotWindow = new TwitchBotWindow(TwitchBotConfig);
             twitchBotWindow.ShowDialog();
+
+            _mainWindow.SetTopmost(_config.IsTopmost);
+        }
+
+        private void btn_OBSWebSocketSetting_Click(object sender, RoutedEventArgs e)
+        {
+            // 先關閉主視窗的置頂，避免 OBSWebSocketWindow 被遮蔽
+            _mainWindow.SetTopmost(false);
+
+            var webSocketWindow = new OBSWebSocketWindow(_config);
+            webSocketWindow.ShowDialog();
+
+            _mainWindow.SetTopmost(_config.IsTopmost);
         }
     }
 }

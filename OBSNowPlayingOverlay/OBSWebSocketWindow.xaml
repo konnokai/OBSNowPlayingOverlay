@@ -1,0 +1,44 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:OBSNowPlayingOverlay"
+        xmlns:hc="https://handyorg.github.io/handycontrol" x:Class="OBSNowPlayingOverlay.OBSWebSocketWindow"
+        mc:Ignorable="d"
+        Title="正在播放 - OBS WebSocket 設定視窗" Height="340" Width="450" Closing="Window_Closing">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,0,10,0" Grid.ColumnSpan="2">
+            <Hyperlink NavigateUri="https://github.com/konnokai/OBSNowPlayingOverlay/blob/master/HOW_TO_USE_OBS_WEBSOCKET.md" RequestNavigate="Hyperlink_RequestNavigate">
+                如何使用 OBS WebSocket
+            </Hyperlink>
+        </Label>
+
+        <Label Content="伺服器 IP" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,0,5,0" Grid.Row="1"/>
+        <TextBox x:Name="txt_OBSWebSocketIP" Grid.Column="1" TextWrapping="Wrap" Text="ws://127.0.0.1" VerticalAlignment="Center" Margin="5,0,10,0" Grid.Row="1"/>
+
+        <Label Content="伺服器連線埠" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,0,5,0" Grid.Row="2"/>
+        <TextBox x:Name="txt_OBSWebSocketPort" Grid.Column="1" TextWrapping="Wrap" Text="4455" VerticalAlignment="Center" Margin="5,0,10,0" Grid.Row="2"/>
+
+        <Label Content="伺服器密碼" HorizontalAlignment="Stretch" Grid.Row="3" VerticalAlignment="Center" Margin="10,0,5,0" AutomationProperties.HelpText="若未啟用驗證則留空即可"/>
+        <hc:PasswordBox x:Name="pb_OBSWebSocketPassword" Grid.Column="1" Margin="5,0,10,0" Grid.Row="3" VerticalAlignment="Center" ShowEyeButton="True" AutomationProperties.HelpText="123"/>
+
+        <CheckBox x:Name="cb_UseBlackAsTitleColor" Content="勾選時使用黑色當標題顏色，否則為白色" HorizontalAlignment="Center" Grid.Row="4" Grid.ColumnSpan="2" Margin="10,0,10,0" Checked="cb_UseBlackAsTitleColor_Checked" Unchecked="cb_UseBlackAsTitleColor_Unchecked"/>
+
+        <Button x:Name="btn_ConnectOBSWebSocket" Content="連線到 OBS WebSocket 伺服器" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="5" VerticalAlignment="Top" Grid.ColumnSpan="2" Click="btn_ConnectOBSWebSocket_Click"/>
+        <Button x:Name="btn_DisconnectOBSWebSocket" Content="中斷 OBS WebSocket 連線" HorizontalAlignment="Right" Margin="0,10,10,0" Grid.Row="5" VerticalAlignment="Top" Grid.Column="0" Grid.ColumnSpan="2" IsEnabled="False" Click="btn_DisconnectOBSWebSocket_Click"/>
+    </Grid>
+</Window>

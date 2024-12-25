@@ -27,7 +27,7 @@
 
         <Wpf:WebView2 x:Name="webView" Grid.Row="0" Grid.ColumnSpan="1" Grid.Column="2" Grid.RowSpan="8" Margin="5,10,10,10" />
         
-        <Label VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="10,10,5,0" Grid.ColumnSpan="2">
+        <Label VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,0,5,0" Grid.ColumnSpan="2">
             <Hyperlink NavigateUri="https://github.com/konnokai/OBSNowPlayingOverlay/blob/master/HOW_TO_USE_TWITCH_BOT.md" RequestNavigate="Hyperlink_RequestNavigate">
                 如何產生及使用 Twitch Bot 相關 Token
             </Hyperlink>

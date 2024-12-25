@@ -23,10 +23,12 @@
 - YouTube (包含 YouTube Music)
 - SoundCloud
 - Spotify
-- bilibili (V1.0.5 新增，需搭配瀏覽器插件 v1.0.2.1)
+- bilibili (v1.0.5 新增，需搭配瀏覽器插件 v1.0.2.1)
+- OBS 媒體來源 (v1.1.4 新增，需搭配 [obs-websocket](https://github.com/obsproject/obs-websocket)) (通常情況下已被新版 OBS 包含在內，除非你的 OBS 版本低於 28) (由 [澪Rei](https://x.com/Reirei_Neon) 提議)
 
 # 如何使用
 
+0. 確保你的系統位元是 x64 (現在的電腦應該都會是 x64) ([如何查看系統位元](https://support.lenovo.com/tw/zh/solutions/ht117173))
 1. 安裝 [瀏覽器插件](https://chromewebstore.google.com/detail/obs-%E6%AD%A3%E5%9C%A8%E6%92%AD%E6%94%BE/bbaajjiddghleiifnnhagkgjfihnkphe) (剛安裝完插件的話需要重整網頁或是重開瀏覽器來讓插件載入)
 2. 安裝 [.NET 6 Desktop Runtime](https://dotnet.microsoft.com/zh-tw/download/dotnet/thank-you/runtime-desktop-6.0.36-windows-x64-installer)
 3. [點我下載](https://github.com/konnokai/OBSNowPlayingOverlay/releases/latest/download/OBSNowPlayingOverlay.zip) 最新版的 `OBSNowPlayingOverlay.zip` 壓縮包並解壓縮
@@ -101,6 +103,7 @@ OBS 的畫面應該會長這樣
 # 關於 & 參考專案
 
 - [Now Playing - OBS](https://gitlab.com/tizhproger/now-playing-obs)
+- [obs-websocket-dotnet](https://github.com/konnokai/obs-websocket-dotnet) (自編譯版本，原專案已停止更新)
 - [Vinyl icons](https://www.flaticon.com/free-icons/vinyl) created by Those Icons - Flaticon
 - [Lp icons](https://www.flaticon.com/free-icons/lp) created by Alfredo Hernandez - Flaticon
 - [Pause icons](https://www.flaticon.com/free-icons/pause) created by Debi Alpa Nugraha - Flaticon
