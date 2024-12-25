@@ -29,8 +29,8 @@ jobs:
 
     - name: Create zip package
       run: |
-        cd ./OBSNowPlayingOverlay/bin/Release/net6.0-windows/win-x64/publish
-        Compress-Archive * ../../../OBSNowPlayingOverlay.zip
+        cd ./OBSNowPlayingOverlay/bin/x64/Release/net6.0-windows/win-x64/publish
+        Compress-Archive * ../../../../OBSNowPlayingOverlay.zip
       shell: pwsh
 
     - name: Generate Changelog
