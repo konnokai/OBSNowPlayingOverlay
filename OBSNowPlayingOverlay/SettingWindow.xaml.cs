@@ -9,6 +9,7 @@ using System.Net;
 using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Media;
+using TwitchLib.Api;
 using WebSocketSharp.Server;
 using FontFamily = System.Windows.Media.FontFamily;
 
@@ -30,35 +31,6 @@ namespace OBSNowPlayingOverlay
         public SettingWindow()
         {
             InitializeComponent();
-
-            try
-            {
-                AutoUpdater.RunUpdateAsAdmin = false;
-                AutoUpdater.HttpUserAgent = "OBSNowPlayingOverlay";
-                AutoUpdater.SetOwner(this);
-                AutoUpdater.CheckForUpdateEvent += (e) =>
-                {
-                    if (e.Error != null)
-                    {
-                        AnsiConsole.WriteException(e.Error);
-                    }
-                    else if (e.IsUpdateAvailable)
-                    {
-                        AnsiConsole.MarkupLine("檢查更新: [green]發現更新![/]");
-                        Dispatcher.Invoke(() => AutoUpdater.ShowUpdateForm(e));
-                    }
-                    else
-                    {
-                        AnsiConsole.MarkupLine("檢查更新: [darkorange3]沒有需要更新[/]");
-                    }
-                };
-
-                Task.Run(() => AutoUpdater.Start("https://raw.githubusercontent.com/konnokai/OBSNowPlayingOverlay/refs/heads/master/Docs/Update.xml"));
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.WriteException(ex);
-            }
 
             if (File.Exists("Config.json"))
             {
@@ -100,6 +72,43 @@ namespace OBSNowPlayingOverlay
 
             try
             {
+                AutoUpdater.RunUpdateAsAdmin = false;
+                AutoUpdater.HttpUserAgent = "OBSNowPlayingOverlay";
+                AutoUpdater.SetOwner(this);
+                AutoUpdater.CheckForUpdateEvent += (e) =>
+                {
+                    if (e.Error != null)
+                    {
+                        AnsiConsole.WriteException(e.Error);
+                    }
+                    else if (e.IsUpdateAvailable)
+                    {
+                        AnsiConsole.MarkupLine("檢查更新: [green]發現更新![/]");
+                        Dispatcher.Invoke(() => AutoUpdater.ShowUpdateForm(e));
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine("檢查更新: [darkorange3]沒有需要更新[/]");
+                    }
+
+                    if (!e.IsUpdateAvailable)
+                    {
+                        ContinueAfterCheckUpdate();
+                    }
+                };
+
+                Task.Run(() => AutoUpdater.Start("https://raw.githubusercontent.com/konnokai/OBSNowPlayingOverlay/refs/heads/master/Docs/Update.xml"));
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.WriteException(ex);
+            }
+        }
+
+        private void ContinueAfterCheckUpdate()
+        {
+            try
+            {
                 _wsServer = new WebSocketServer(IPAddress.Loopback, 52998);
                 _wsServer.AddWebSocketService<NowPlaying>("/");
                 _wsServer.Start();
@@ -117,8 +126,6 @@ namespace OBSNowPlayingOverlay
                 AnsiConsole.WriteException(ex);
                 return;
             }
-
-            _mainWindow.Show();
 
             chkb_LoadSystemFonts.Dispatcher.Invoke(() =>
             {
@@ -156,6 +163,48 @@ namespace OBSNowPlayingOverlay
             });
 
             MainWindow.IsUseBlackAsTitleColor = _config.OBSUseBlackAsTitleColor;
+
+            Dispatcher.Invoke(() => _mainWindow.Show());
+
+            if (!string.IsNullOrEmpty(TwitchBotConfig.AccessToken) && TwitchBotConfig.AutoLogin)
+            {
+                var twitchAPI = new TwitchAPI()
+                {
+                    Helix =
+                    {
+                        Settings =
+                        {
+                            AccessToken = TwitchBotConfig.AccessToken,
+                            ClientId = TwitchBotConfig.ClientId
+                        }
+                    }
+                };
+
+                Task.Run(async () =>
+                {
+                    var accessTokenResponse = await twitchAPI.Auth.ValidateAccessTokenAsync();
+                    if (accessTokenResponse == null)
+                    {
+                        AnsiConsole.MarkupLine("[red]Twitch AccessToken 驗證失敗，請重新登入[/]");
+                        TwitchBotConfig.AccessToken = "";
+                        return;
+                    }
+
+                    AnsiConsole.MarkupLineInterpolated($"Twitch AccessToken 驗證成功，過期時間: [darkorange3]{DateTime.Now.AddSeconds(accessTokenResponse.ExpiresIn)}[/]");
+                    TwitchBotConfig.UserLogin = accessTokenResponse.Login;
+
+                    try
+                    {
+                        File.WriteAllText("TwitchBotConfig.json", JsonConvert.SerializeObject(TwitchBotConfig, Formatting.Indented));
+                    }
+                    catch (Exception)
+                    {
+                    }
+
+                    TwitchBot.Bot.SetBotCred(TwitchBotConfig.AccessToken, accessTokenResponse.Login);
+                    TwitchBot.Bot.StartBot();
+                });
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -248,7 +297,7 @@ namespace OBSNowPlayingOverlay
                     {
                         AnsiConsole.MarkupLineInterpolated($"[red]字型載入失敗: {Path.GetFileName(item)}[/]");
                         AnsiConsole.WriteException(ex);
-                    }
+                    } 
                 }
             }
 

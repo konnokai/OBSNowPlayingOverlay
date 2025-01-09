@@ -49,6 +49,10 @@ namespace OBSNowPlayingOverlay
             {
                 txt_UserLogin.Text = _twitchBotConfig.UserLogin;
             });
+            cb_AutoLoginBot.Dispatcher.Invoke(() =>
+            {
+                cb_AutoLoginBot.IsChecked = _twitchBotConfig.AutoLogin;
+            });
 
             if (TwitchBot.Bot.IsConnect.HasValue && TwitchBot.Bot.IsConnect.Value)
             {
@@ -257,6 +261,16 @@ namespace OBSNowPlayingOverlay
             {
                 btn_CheckAccessToken.IsEnabled = true;
             });
+        }
+
+        private void cb_AutoLoginBot_Checked(object sender, RoutedEventArgs e)
+        {
+            SettingWindow.TwitchBotConfig.AutoLogin = true;
+        }
+
+        private void cb_AutoLoginBot_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SettingWindow.TwitchBotConfig.AutoLogin = false;
         }
     }
 }

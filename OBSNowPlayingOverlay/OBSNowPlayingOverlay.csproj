@@ -7,13 +7,13 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWPF>true</UseWPF>
 		<ApplicationIcon>Assets\icon.ico</ApplicationIcon>
-		<Version>1.1.4</Version>
+		<Version>1.1.5</Version>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/konnokai/OBSNowPlayingOverlay</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<StartupObject>OBSNowPlayingOverlay.App</StartupObject>
-		<Platforms>AnyCPU;x64</Platforms>
+		<Platforms>x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
