@@ -185,24 +185,23 @@ namespace OBSNowPlayingOverlay
                     var accessTokenResponse = await twitchAPI.Auth.ValidateAccessTokenAsync();
                     if (accessTokenResponse == null)
                     {
-                        AnsiConsole.MarkupLine("[red]Twitch AccessToken 驗證失敗，請重新登入[/]");
+                        MessageBox.Show("Twitch AccessToken 驗證失敗，請重新登入", "錯誤", MessageBoxButton.OK, MessageBoxImage.Error);
                         TwitchBotConfig.AccessToken = "";
-                        return;
                     }
+                    else
+                    {
+                        AnsiConsole.MarkupLineInterpolated($"Twitch AccessToken 驗證成功，過期時間: [darkorange3]{DateTime.Now.AddSeconds(accessTokenResponse.ExpiresIn)}[/]");
+                        TwitchBotConfig.UserLogin = accessTokenResponse.Login;
 
-                    AnsiConsole.MarkupLineInterpolated($"Twitch AccessToken 驗證成功，過期時間: [darkorange3]{DateTime.Now.AddSeconds(accessTokenResponse.ExpiresIn)}[/]");
-                    TwitchBotConfig.UserLogin = accessTokenResponse.Login;
+                        TwitchBot.Bot.SetBotCred(TwitchBotConfig.AccessToken, accessTokenResponse.Login);
+                        TwitchBot.Bot.StartBot();
+                    }
 
                     try
                     {
                         File.WriteAllText("TwitchBotConfig.json", JsonConvert.SerializeObject(TwitchBotConfig, Formatting.Indented));
                     }
-                    catch (Exception)
-                    {
-                    }
-
-                    TwitchBot.Bot.SetBotCred(TwitchBotConfig.AccessToken, accessTokenResponse.Login);
-                    TwitchBot.Bot.StartBot();
+                    catch (Exception) { }
                 });
             }
         }
@@ -297,7 +296,7 @@ namespace OBSNowPlayingOverlay
                     {
                         AnsiConsole.MarkupLineInterpolated($"[red]字型載入失敗: {Path.GetFileName(item)}[/]");
                         AnsiConsole.WriteException(ex);
-                    } 
+                    }
                 }
             }
 

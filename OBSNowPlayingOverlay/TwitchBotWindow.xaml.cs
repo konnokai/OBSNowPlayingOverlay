@@ -56,6 +56,10 @@ namespace OBSNowPlayingOverlay
 
             if (TwitchBot.Bot.IsConnect.HasValue && TwitchBot.Bot.IsConnect.Value)
             {
+                btn_CheckAccessToken.Dispatcher.Invoke(() =>
+                {
+                    btn_CheckAccessToken.IsEnabled = false;
+                });
                 btn_StopBot.Dispatcher.Invoke(() =>
                 {
                     btn_StopBot.IsEnabled = true;
@@ -169,10 +173,9 @@ namespace OBSNowPlayingOverlay
                 }
             };
 
-            var accessTokenResponse = await twitchAPI.Auth.ValidateAccessTokenAsync();
+            var accessTokenResponse = await twitchAPI.Auth.ValidateAccessTokenAsync(); 
             if (accessTokenResponse == null)
             {
-                AnsiConsole.MarkupLine("[red]Twitch AccessToken 驗證失敗，請重新登入[/]");
                 SettingWindow.TwitchBotConfig.AccessToken = "";
 
                 await webView.EnsureCoreWebView2Async()
@@ -199,32 +202,32 @@ namespace OBSNowPlayingOverlay
                     txt_AccessToken.Password = "";
                 });
 
-                return;
+                MessageBox.Show("Twitch AccessToken 驗證失敗，請重新登入", "錯誤", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            AnsiConsole.MarkupLineInterpolated($"[green]Twitch AccessToken 驗證成功，過期時間: {DateTime.Now.AddSeconds(accessTokenResponse.ExpiresIn)}[/]");
-
-            txt_UserLogin.Dispatcher.Invoke(() =>
+            else
             {
-                txt_UserLogin.Text = accessTokenResponse.Login;
-            });
+                AnsiConsole.MarkupLineInterpolated($"[green]Twitch AccessToken 驗證成功，過期時間: {DateTime.Now.AddSeconds(accessTokenResponse.ExpiresIn)}[/]");
 
-            SettingWindow.TwitchBotConfig.UserLogin = accessTokenResponse.Login;
+                txt_UserLogin.Dispatcher.Invoke(() =>
+                {
+                    txt_UserLogin.Text = accessTokenResponse.Login;
+                });
 
-            btn_StartBot.Dispatcher.Invoke(() =>
-            {
-                btn_StartBot.IsEnabled = true;
-            });
+                SettingWindow.TwitchBotConfig.UserLogin = accessTokenResponse.Login;
+
+                btn_StartBot.Dispatcher.Invoke(() =>
+                {
+                    btn_StartBot.IsEnabled = true;
+                });
+
+                TwitchBot.Bot.SetBotCred(SettingWindow.TwitchBotConfig.AccessToken, accessTokenResponse.Login);
+            }
 
             try
             {
                 File.WriteAllText("TwitchBotConfig.json", JsonConvert.SerializeObject(SettingWindow.TwitchBotConfig, Formatting.Indented));
             }
-            catch (Exception)
-            {
-            }
-
-            TwitchBot.Bot.SetBotCred(SettingWindow.TwitchBotConfig.AccessToken, accessTokenResponse.Login);
+            catch (Exception) { }
         }
 
         private void btn_StartBot_Click(object sender, RoutedEventArgs e)
