@@ -60,7 +60,7 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
                     return;
 
                 // Update the logic to handle JSON messages.
-                if (e.Data.StartsWith("{") && e.Data.EndsWith("}"))
+                if (e.Data.StartsWith('{') && e.Data.EndsWith('}'))
                 {
                     NowPlayingJson nowPlaying = JsonConvert.DeserializeObject<NowPlayingJson>(e.Data)!;
 
@@ -85,7 +85,14 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
 
                         if (MainWindow.LatestWebSocketGuid == guid)
                         {
-                            MainWindow.LatestWebSocketGuid = string.Empty;
+                            // 主動偵測是否有其他正在播放的 client，若沒有正在播放的 client 則改為第一個偵測到的 client 並切換
+                            var playingClient = _clientDict.Values.FirstOrDefault(c => c.IsPlaying) ?? _clientDict.Values.FirstOrDefault();
+                            if (playingClient != null)
+                            {
+                                // 確實會變動，但因為沒有新的 ProcessNowPlayingData 事件，導致主介面不會有畫面上的更新，直到 WebSocket Client 重新推送資料
+                                // 若要解決畫面沒更新的問題可能得 WebSocketClientInfo 內多加 LatestJsonData 之類的欄位，但這樣頻繁刷新資料有點費資源
+                                MainWindow.LatestWebSocketGuid = playingClient.Guid;
+                            }
                         }
                     }
                 }
@@ -117,8 +124,21 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
                 _clientDict.TryAdd(nowPlaying.Guid, client);
             }
 
+            bool wasPlaying = client.IsPlaying;
             client.LastActiveTime = DateTime.Now;
             client.IsPlaying = nowPlaying.Status == "playing";
+
+            // 主動切換：如果本 client 從播放變成暫停，且目前 guid 是 LatestWebSocketGuid
+            if (wasPlaying && !client.IsPlaying && MainWindow.LatestWebSocketGuid == client.Guid)
+            {
+                // 主動偵測是否有其他正在播放的 client，若沒有正在播放的 client 則改為第一個偵測到的 client 並切換
+                var playingClient = _clientDict.Values.FirstOrDefault(c => c.IsPlaying) ?? _clientDict.Values.FirstOrDefault();
+                if (playingClient != null)
+                {
+                    MainWindow.LatestWebSocketGuid = playingClient.Guid;
+                }
+                // 若沒有其他 client 正在播放，則不變動 LatestWebSocketGuid
+            }
 
             // If this client is the only one playing, set it as the latest
             // 當有兩個來源在播放時，若其中一個來源暫停，會導致條件成立

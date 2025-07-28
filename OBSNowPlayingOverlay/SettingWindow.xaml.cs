@@ -190,7 +190,7 @@ namespace OBSNowPlayingOverlay
                     }
                     else
                     {
-                        AnsiConsole.MarkupLineInterpolated($"Twitch AccessToken 驗證成功，過期時間: [darkorange3]{DateTime.Now.AddSeconds(accessTokenResponse.ExpiresIn)}[/]");
+                        AnsiConsole.MarkupLineInterpolated($"[green]Twitch AccessToken 驗證成功，過期時間: {DateTime.Now.AddSeconds(accessTokenResponse.ExpiresIn)}[/]");
                         TwitchBotConfig.UserLogin = accessTokenResponse.Login;
 
                         TwitchBot.Bot.SetBotCred(TwitchBotConfig.AccessToken, accessTokenResponse.Login);

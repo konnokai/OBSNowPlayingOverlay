@@ -36,13 +36,13 @@
 
         <Button x:Name="btn_StartOAuth" Grid.Row="1" Grid.ColumnSpan="2" Content="登入並獲取 Token" HorizontalAlignment="Stretch" Margin="10,0,5,0" Click="btn_StartOAuth_Click" />
 
-        <Label Content="Access Token" Grid.Row="2" HorizontalAlignment="Stretch" Margin="10,0,5,0"/>
+        <Label Content="存取金鑰" Grid.Row="2" HorizontalAlignment="Stretch" Margin="10,0,5,0"/>
         <hc:PasswordBox x:Name="txt_AccessToken" Grid.Column="1" Margin="5,0,5,0" Grid.Row="2" VerticalAlignment="Center" IsEnabled="False" Grid.ColumnSpan="1"/>
 
-        <Label Content="ClientId" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,5,0"/>
+        <Label Content="客戶端 Id" Grid.Row="3" HorizontalAlignment="Stretch" Margin="10,0,5,0"/>
         <hc:PasswordBox x:Name="txt_ClientId" Grid.Column="1" Margin="5,0,5,0" Grid.Row="3" VerticalAlignment="Center" IsEnabled="False" Grid.ColumnSpan="1"/>
 
-        <Label Content="UserLogin" Grid.Row="4" HorizontalAlignment="Stretch" Margin="10,0,5,0"/>
+        <Label Content="已登入的使用者帳號" Grid.Row="4" HorizontalAlignment="Stretch" Margin="10,0,5,0"/>
         <TextBox x:Name="txt_UserLogin" Grid.Column="1" Margin="5,0,5,0" Grid.Row="4" VerticalAlignment="Center" IsEnabled="False" Grid.ColumnSpan="1"/>
 
         <CheckBox x:Name="cb_AutoLoginBot" Content="自動登入 Twitch Bot" Grid.Row="5" Grid.ColumnSpan="2" Margin="10,0,10,0" HorizontalAlignment="Center" IsChecked="True" Checked="cb_AutoLoginBot_Checked" Unchecked="cb_AutoLoginBot_Unchecked"/>

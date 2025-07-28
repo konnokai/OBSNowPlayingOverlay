@@ -19,7 +19,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 8.0.x
 
     - name: Restore dependencies
       run: dotnet restore
@@ -29,7 +29,7 @@ jobs:
 
     - name: Create zip package
       run: |
-        cd ./OBSNowPlayingOverlay/bin/x64/Release/net6.0-windows/win-x64/publish
+        cd ./OBSNowPlayingOverlay/bin/x64/Release/net8.0-windows/win-x64/publish
         Compress-Archive * ../../../OBSNowPlayingOverlay.zip
       shell: pwsh
 

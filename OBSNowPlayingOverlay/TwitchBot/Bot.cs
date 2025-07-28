@@ -15,7 +15,7 @@ namespace OBSNowPlayingOverlay.TwitchBot
         private static TwitchClient? client = null;
         private static DateTime latestNPCommandExecuteTime = DateTime.MinValue;
 
-        private static readonly string[] _musicCommandArray = new[] { "music", "playing", "np", "nowplaying", "正在播放", "音樂" };
+        private static readonly string[] _musicCommandArray = ["music", "playing", "np", "nowplaying", "正在播放", "音樂"];
 
         public static void SetBotCred(string accessToken, string userLogin)
         {

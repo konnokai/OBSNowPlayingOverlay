@@ -120,7 +120,7 @@ namespace OBSNowPlayingOverlay.OBSWebSocket
 
         private static void _obsWebsocket_Connected(object? sender, EventArgs e)
         {
-            Console.WriteLine("OBS WebSocket 連線成功!");
+            AnsiConsole.MarkupLine("[green]OBS WebSocket 連線成功![/]");
 
             _mediaSourceList.Clear();
             foreach (var item in _obsWebsocket.GetInputList("ffmpeg_source"))
@@ -136,7 +136,7 @@ namespace OBSNowPlayingOverlay.OBSWebSocket
 
         private static void _obsWebsocket_Disconnected(object? sender, ObsDisconnectionInfo e)
         {
-            Console.WriteLine("OBS WebSocket 連線中斷");
+            AnsiConsole.MarkupLine("[yellow]OBS WebSocket 連線中斷[/]");
 
             _mediaSourceList.Clear();
 
