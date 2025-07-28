@@ -30,7 +30,7 @@
 
 0. 確保你的系統位元是 x64 (現在的電腦應該都會是 x64) ([如何查看系統位元](https://support.lenovo.com/tw/zh/solutions/ht117173))
 1. 安裝 [瀏覽器插件](https://chromewebstore.google.com/detail/obs-%E6%AD%A3%E5%9C%A8%E6%92%AD%E6%94%BE/bbaajjiddghleiifnnhagkgjfihnkphe) (剛安裝完插件的話需要重整網頁或是重開瀏覽器來讓插件載入)
-2. 安裝 [.NET 6 Desktop Runtime](https://dotnet.microsoft.com/zh-tw/download/dotnet/thank-you/runtime-desktop-6.0.36-windows-x64-installer)
+2. 安裝 [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/zh-tw/download/dotnet/thank-you/runtime-desktop-8.0.18-windows-x64-installer) (v1.2.0 改用 .NET 8 開發)
 3. [點我下載](https://github.com/konnokai/OBSNowPlayingOverlay/releases/latest/download/OBSNowPlayingOverlay.zip) 最新版的 `OBSNowPlayingOverlay.zip` 壓縮包並解壓縮
 4. 確保瀏覽器插件已安裝以及重整網頁，並打開 `OBSNowPlayingOverlay.exe`
 5. 設定想要的字型以及視窗寬度
@@ -74,7 +74,7 @@ OBS 的畫面應該會長這樣
 <details>
 <summary>程式不開或是打開來馬上閃退</summary>
   
-- 記得裝 [.NET 6 Desktop Runtime](https://dotnet.microsoft.com/zh-tw/download/dotnet/thank-you/runtime-desktop-6.0.36-windows-x64-installer)
+- 記得裝 [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/zh-tw/download/dotnet/thank-you/runtime-desktop-8.0.18-windows-x64-installer)
 
 </details>
 <details>
