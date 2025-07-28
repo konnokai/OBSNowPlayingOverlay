@@ -93,12 +93,12 @@ namespace OBSNowPlayingOverlay.OBSWebSocket
                             NowPlaying.ProcessNowPlayingData(new NowPlayingJson()
                             {
                                 Title = Path.GetFileNameWithoutExtension(filePath!.ToString()),
-                                Artists = new List<string> { "" },
+                                Artists = [""],
                                 Cover = "",
                                 IsLive = false,
                                 Platform = "obs",
                                 Guid = item.GetHashCode().ToString(),
-                                Status = status.State == "OBS_MEDIA_STATE_PLAYING" ? "playing" : "paused",
+                                Status = status.State == OBSWebsocketDotNet.Types.MediaState.OBS_MEDIA_STATE_PLAYING ? "playing" : "paused",
                                 Progress = status.Cursor.Value,
                                 Duration = status.Duration.Value,
                                 SongLink = "無",
