@@ -7,7 +7,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWPF>true</UseWPF>
 		<ApplicationIcon>Assets\icon.ico</ApplicationIcon>
-		<Version>1.2.0</Version>
+		<Version>1.2.1</Version>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/konnokai/OBSNowPlayingOverlay</RepositoryUrl>
