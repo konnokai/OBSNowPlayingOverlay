@@ -3,11 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:Wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         xmlns:hc="https://handyorg.github.io/handycontrol" 
         xmlns:local="clr-namespace:OBSNowPlayingOverlay"
         mc:Ignorable="d"
-        Title="正在播放 - Twitch Bot 設定視窗" Height="600" Width="850" Closing="Window_Closing">
+        Title="正在播放 - Twitch Bot 設定視窗" Height="450" Width="450" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -23,10 +22,9 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
 
-        <Wpf:WebView2 x:Name="webView" Grid.Row="0" Grid.ColumnSpan="1" Grid.Column="2" Grid.RowSpan="9" Margin="5,10,10,10" />
+        <!-- 移除 WebView2 控制項 -->
         
         <Label VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,0,5,0" Grid.ColumnSpan="2">
             <Hyperlink NavigateUri="https://github.com/konnokai/OBSNowPlayingOverlay/blob/master/HOW_TO_USE_TWITCH_BOT.md" RequestNavigate="Hyperlink_RequestNavigate">
