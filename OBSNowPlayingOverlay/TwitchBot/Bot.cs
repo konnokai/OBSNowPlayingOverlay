@@ -65,8 +65,15 @@ namespace OBSNowPlayingOverlay.TwitchBot
             {
                 AnsiConsole.MarkupLineInterpolated($"Twitch Bot 指令觸發: [green]{e.Command.ChatMessage.Username} - {e.Command.CommandText}[/]");
 
-                client?.SendMessage(e.Command.ChatMessage.Channel, $"正在播放: {MainWindow.NowPlayingTitle}");
-                client?.SendMessage(e.Command.ChatMessage.Channel, $"網址: {MainWindow.NowPlayingUrl}");
+                if (string.IsNullOrEmpty(MainWindow.NowPlayingTitle))
+                {
+                    client?.SendMessage(e.Command.ChatMessage.Channel, "目前沒有播放的音樂");
+                }
+                else
+                {
+                    client?.SendMessage(e.Command.ChatMessage.Channel, $"正在播放: {MainWindow.NowPlayingTitle}");
+                    client?.SendMessage(e.Command.ChatMessage.Channel, $"網址: {MainWindow.NowPlayingUrl}");
+                }
 
                 latestNPCommandExecuteTime = DateTime.Now;
             }
