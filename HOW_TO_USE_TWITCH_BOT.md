@@ -6,24 +6,28 @@
 # Bot 指令
 | 指令 | 說明 |
 | --- | --- |
-| `!music`, `!playing`, `!np`, `!nowplaying`, `!正在播放`, `!音樂` | 正在播放 |
+| `!music`, `!playing`, `!np`, `!nowplaying`, `!正在播放`, `!音樂` | 將正在播放的音樂資訊發送至聊天室 |
 
 # 如何使用 Twitch Bot
 
-1. 點擊 `登入並獲取 Token`，此時右邊視窗會出現 Twitch 登入畫面
+1. 點擊 `登入並獲取 Token`，此時預設瀏覽器會跳出 OAuth 畫面
  
 ![StartLogin](Docs/Twitch_Bot/StartLogin.png)
 
-2. 登入 Twitch，之後會出現 OAuth 畫面
+2. 出現 OAuth 畫面後，點擊 `Authorize`
 
 ![OAuth](Docs/Twitch_Bot/OAuth.png)
 
-3. 將畫面往下拉，點擊 `Authorize`
+3. 若授權成功的話網頁會提示使用者可以關閉頁面
 
-![Authorize](Docs/Twitch_Bot/Authorize.png)
+![OAuthOk](Docs/Twitch_Bot/OAuthOk.png)
 
-4. 若授權成功的話網頁以及登入按鈕會自動關閉
-5. 點擊 `驗證 AccessToken 是否有效` 讓程式驗證，驗證成功後點擊 `啟動 Bot` 即可
+> [!NOTE]
+> 若授權出現問題則會有額外的提示，解不了的話就來問我
+> 
+> 目前已將 OAuth 改為 Force Verify，所以每次點擊登入按鈕都會跳出授權畫面
+
+4. 點擊 `驗證 AccessToken 是否有效` 讓程式驗證，驗證成功後點擊 `啟動 Bot` 即可
 
 ![OAuthDone](Docs/Twitch_Bot/OAuthDone.png)
 
