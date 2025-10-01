@@ -209,7 +209,8 @@ function start_transfer() {
                 return;
 
             // 用 query 方式來獲取標題
-            let title = query('#viewbox_report > div.video-info-title > div > h1', e => e.getAttribute('title'));
+            // 舊的 Query 方式: '#viewbox_report > div.video-info-title > div > h1'
+            let title = query('div.video-info-title > div > h1', e => e.getAttribute('title'));            
             if (!title)
                 return;
 
