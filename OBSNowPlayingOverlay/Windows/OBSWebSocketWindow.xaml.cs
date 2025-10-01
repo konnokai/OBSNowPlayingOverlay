@@ -1,18 +1,19 @@
-﻿using OBSWebsocketDotNet.Communication;
+﻿using OBSNowPlayingOverlay.Config;
+using OBSWebsocketDotNet.Communication;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Navigation;
 
-namespace OBSNowPlayingOverlay
+namespace OBSNowPlayingOverlay.Windows
 {
     /// <summary>
     /// OBSWebSocketWindow.xaml 的互動邏輯
     /// </summary>
     public partial class OBSWebSocketWindow : Window
     {
-        private readonly Config _config;
+        private readonly MainConfig _config;
 
-        public OBSWebSocketWindow(Config config)
+        public OBSWebSocketWindow(MainConfig config)
         {
             _config = config;
 

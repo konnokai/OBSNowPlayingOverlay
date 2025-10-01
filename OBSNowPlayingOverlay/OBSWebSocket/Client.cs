@@ -148,7 +148,7 @@ namespace OBSNowPlayingOverlay.OBSWebSocket
             // Todo: 更換場景後需要讓舊場景的 Client IsPlaying = false
             // 否則需要等 Timer 3 秒鐘自動設定屬性後才會顯示新場景的媒體播放狀態
             AnsiConsole.MarkupLineInterpolated($"OBS 場景更換，清除最後使用的 Guid: [green]{e.SceneName}[/]");
-            MainWindow.LatestWebSocketGuid = string.Empty;
+            Windows.MainWindow.LatestWebSocketGuid = string.Empty;
         }
 
         private static void _obsWebsocket_InputCreated(object? sender, InputCreatedEventArgs e)

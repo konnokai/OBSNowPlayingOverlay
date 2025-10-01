@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Data;
 
-namespace OBSNowPlayingOverlay
+namespace OBSNowPlayingOverlay.Windows
 {
     public class RectConverter : IMultiValueConverter
     {

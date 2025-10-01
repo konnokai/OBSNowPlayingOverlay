@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OBSNowPlayingOverlay.Config;
 using Spectre.Console;
 using System.Diagnostics;
 using System.IO;
@@ -7,7 +8,7 @@ using System.Windows;
 using System.Windows.Navigation;
 using TwitchLib.Api;
 
-namespace OBSNowPlayingOverlay
+namespace OBSNowPlayingOverlay.Windows
 {
     /// <summary>
     /// TwitchBotWindow.xaml 的互動邏輯

@@ -1,6 +1,6 @@
-﻿namespace OBSNowPlayingOverlay
+﻿namespace OBSNowPlayingOverlay.Config
 {
-    public class Config
+    public class MainConfig
     {
         public bool IsLoadSystemFonts { get; set; } = false;
         public bool IsUseCoverImageAsBackground { get; set; } = false;

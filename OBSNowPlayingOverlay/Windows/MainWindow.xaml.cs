@@ -17,7 +17,7 @@ using Image = SixLabors.ImageSharp.Image;
 using ImageBrush = System.Windows.Media.ImageBrush;
 using Rectangle = SixLabors.ImageSharp.Rectangle;
 
-namespace OBSNowPlayingOverlay
+namespace OBSNowPlayingOverlay.Windows
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

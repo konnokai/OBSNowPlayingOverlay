@@ -1,5 +1,6 @@
 ﻿using AutoUpdaterDotNET;
 using Newtonsoft.Json;
+using OBSNowPlayingOverlay.Config;
 using OBSNowPlayingOverlay.WebSocketBehavior;
 using Spectre.Console;
 using System.Collections.ObjectModel;
@@ -13,7 +14,7 @@ using TwitchLib.Api;
 using WebSocketSharp.Server;
 using FontFamily = System.Windows.Media.FontFamily;
 
-namespace OBSNowPlayingOverlay
+namespace OBSNowPlayingOverlay.Windows
 {
     /// <summary>
     /// SettingWindow.xaml 的互動邏輯
@@ -22,7 +23,7 @@ namespace OBSNowPlayingOverlay
     {
         public static TwitchBotConfig TwitchBotConfig { get; set; } = new();
 
-        private readonly Config _config = new();
+        private readonly MainConfig _config = new();
         private readonly MainWindow _mainWindow = new();
         private readonly ObservableCollection<KeyValuePair<string, FontFamily>> _fontFamilies = new();
 
@@ -36,7 +37,7 @@ namespace OBSNowPlayingOverlay
             {
                 try
                 {
-                    _config = JsonConvert.DeserializeObject<Config>(File.ReadAllText("Config.json"))!;
+                    _config = JsonConvert.DeserializeObject<MainConfig>(File.ReadAllText("Config.json"))!;
                 }
                 catch (Exception ex)
                 {

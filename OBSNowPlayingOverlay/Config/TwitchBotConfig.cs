@@ -1,4 +1,4 @@
-﻿namespace OBSNowPlayingOverlay
+﻿namespace OBSNowPlayingOverlay.Config
 {
     public class TwitchBotConfig
     {
