@@ -8,6 +8,10 @@
 
 起因是因為我推 ([998rrr](https://www.twitch.tv/998rrr)) 的 NowPlaying 軟體出現問題，正好拿來練手寫個工具看看
 
+> [!WARNING]
+> Brave 瀏覽器的 Shields 盾牌功能會阻擋 localhost WS 連線，導致小工具無法接收來自擴充功能的訊息。如遇到播放影片後小工具無法正常顯示資訊的情況，請將盾牌功能關閉或是單獨停用該平台的 `追蹤器與廣告封鎖` ([參考來源](https://community.brave.app/t/brave-shields-block-extension-that-connects-to-local-server-through-websocket-connection/187327/1))
+> ![BraveShieldAllow](Docs/BraveShieldAllow.png)
+
 # 特色
 
 - 顯示播放狀態
@@ -81,10 +85,11 @@ OBS 的畫面應該會長這樣
 <summary>程式打開了但播放影片沒有效果</summary>
   
 1. 先去安裝 [瀏覽器插件](https://chromewebstore.google.com/detail/obs-%E6%AD%A3%E5%9C%A8%E6%92%AD%E6%94%BE/bbaajjiddghleiifnnhagkgjfihnkphe)，或是去看看擴充插件有沒有被關閉
-2. 把瀏覽器關掉重開
-3. 把程式打開來
-4. 找個影片播放
-5. 應該要能正常執行
+2. 確保沒有開啟或安裝甚麼封鎖追蹤器相關的擴充插件 (允許 `ws://localhost:52998/` 也可以)
+3. 把瀏覽器關掉重開
+4. 把程式打開來
+5. 找個影片播放
+6. 應該要能正常執行
 
 </details>
 <details>
