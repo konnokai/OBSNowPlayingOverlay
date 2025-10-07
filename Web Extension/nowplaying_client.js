@@ -55,6 +55,22 @@ function timestamp_to_ms(ts) {
     return 0;
 };
 
+function spotifyIsPlaying(el) {
+    const pressed = el.getAttribute('aria-pressed');
+    if (pressed !== null) return pressed === 'true';
+
+    // 回退到 aria-label：支援多語系關鍵字
+    const label = (el.getAttribute('aria-label') || '').trim().toLowerCase();
+    // 「暫停/Pause」通常表示目前正在播放（按鈕動作是暫停）
+    const pauseKeys = ['暫停', '暂停', 'pause', 'pausa', 'pausear'];
+    const playKeys = ['播放', 'play', 'reproducir', 'lecture'];
+
+    if (pauseKeys.some(k => label.includes(k))) return true;   // 正在播放
+    if (playKeys.some(k => label.includes(k))) return false;  // 已暫停
+    // 無法判斷時回傳 null 或自訂預設
+    return null;
+}
+
 function start_transfer() {
     transfer_interval = setInterval(() => {
         // TODO: maybe add more?
@@ -84,7 +100,9 @@ function start_transfer() {
             }
         } else if (hostname === 'open.spotify.com') {
             let data = navigator.mediaSession;
-            let status = query('.XrZ1iHVHAPMya3jkB2sa > button', e => e === null ? 'stopped' : (e.getAttribute('aria-label') === 'Play' || e.getAttribute('aria-label') === 'Слушать' || e.getAttribute('aria-label') === '播放' ? 'stopped' : 'playing'));
+            // 舊的 Query 方式: '.XrZ1iHVHAPMya3jkB2sa > button'
+            const playStatusEl = document.querySelector('button[data-testid="control-button-playpause"]');
+            let status = playStatusEl ? (spotifyIsPlaying(playStatusEl) ? 'playing' : 'stopped') : 'stopped';
             let cover = ''
             let title = ''
             let artists = ''
@@ -94,8 +112,12 @@ function start_transfer() {
                 artists = [data.metadata.artist]
             }
 
-            let progress = query('.IPbBrI6yF4zhaizFmrg6', e => timestamp_to_ms(e.textContent));
-            let duration = query('.DSdahCi0SDG37V9ZmsGO', e => timestamp_to_ms(e.textContent));
+            // 舊的 Query 方式: '.IPbBrI6yF4zhaizFmrg6'
+            const progressEl = document.querySelector('div[data-testid="playback-position"]');
+            let progress = progressEl ? timestamp_to_ms(progressEl.textContent) : 0;
+            // 舊的 Query 方式: '.DSdahCi0SDG37V9ZmsGO'
+            const durationEl = document.querySelector('div[data-testid="playback-duration"]');
+            let duration = durationEl ? timestamp_to_ms(durationEl.textContent) : 0;
             let song_link = ''
             if (document.querySelectorAll('a[aria-label][data-context-item-type="track"]').length > 0) {
                 song_link = 'https://open.spotify.com/track/' + decodeURIComponent(document.querySelectorAll('a[aria-label][data-context-item-type="track"]')[0].href).split(':').slice(-1)[0];
@@ -126,10 +148,10 @@ function start_transfer() {
 
             // 在看 Short 影片
             if (window.location.href.indexOf('shorts') != -1) {
-                title = navigator.mediaSession.metadata.title;
+            title = navigator.mediaSession.metadata.title;
 
                 if (!title)
-                    return;
+                return;
 
                 // Short 影片要另外用方法來獲取目前播放進度
                 duration = 100;
@@ -146,12 +168,12 @@ function start_transfer() {
                 if (!title || title === '')
                     return;
 
-                duration = query('video', e => e.duration * 1000);
-                progress = query('video', e => e.currentTime * 1000);
+            duration = query('video', e => e.duration * 1000);
+            progress = query('video', e => e.currentTime * 1000);
 
-                // 檢測觀看的影片是否正在直播中
+            // 檢測觀看的影片是否正在直播中
                 if (document.querySelector('#movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-left-controls > div.ytp-time-display.notranslate.ytp-live > button')) {
-                    is_live = true;
+                is_live = true;
                 }
             }
 
