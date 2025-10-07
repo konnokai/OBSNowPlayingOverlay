@@ -71,6 +71,13 @@ function spotifyIsPlaying(el) {
     return null;
 }
 
+function detectLiveYouTube() {
+    // 舊的 Query 方式: '#movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-left-controls > div.ytp-time-display.notranslate.ytp-live > button'
+    if (document.querySelector('div.ytp-time-display.notranslate.ytp-live > span.ytp-time-wrapper > div > button')) 
+        return true;
+    return false;
+}
+
 function start_transfer() {
     transfer_interval = setInterval(() => {
         // TODO: maybe add more?
@@ -146,34 +153,38 @@ function start_transfer() {
 
             let title, artists, status, duration, progress, cover, song_link, is_live = false;
 
-            // 在看 Short 影片
-            if (window.location.href.indexOf('shorts') != -1) {
+            //title 統一改用 mediaSession 獲取
             title = navigator.mediaSession.metadata.title;
 
-                if (!title)
+            if (!title || title === '') {
                 return;
-
-                // Short 影片要另外用方法來獲取目前播放進度
-                duration = 100;
-                progress = query('yt-progress-bar > div', e => parseInt(e.getAttribute('aria-valuenow')));
             }
-            else {
-                title = query('.style-scope.ytd-video-primary-info-renderer', e => {
-                    let t = e.getElementsByClassName('title');
-                    if (t && t.length > 0)
-                        return t[0].innerText;
-                    return "";
-                });
-
-                if (!title || title === '')
-                    return;
 
             duration = query('video', e => e.duration * 1000);
             progress = query('video', e => e.currentTime * 1000);
 
+            const isShorts = window.location.href.indexOf('shorts') != -1;
+
             // 檢測觀看的影片是否正在直播中
-                if (document.querySelector('#movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-left-controls > div.ytp-time-display.notranslate.ytp-live > button')) {
+            // 是直播且 window.location.href 不是 shorts，由於從直播頁點 shorts，直播頁面會在背景會誤顯示true
+            if (detectLiveYouTube() && !isShorts) {
                 is_live = true;
+            }
+            else {
+                is_live = false;
+            }
+
+            // 由於混亂的 shorts 機制，從直播切換到 shorts 的時候會導致網頁上出現兩個 <video>
+            // 並且該兩個 <video> 的 baseURI 都會被改成 shorts 的
+            // 但其中一個是錯誤的 live 殘餘容器問詢其會導致出現 duration 為 NaN 甚至是各種不可預期的值的狀況
+            if ((!duration || !progress) && !is_live && isShorts) {
+                const videos = document.querySelectorAll('video');
+                for (const v of videos) {
+                    if (v.duration > 0 && v.currentTime >= 0) {
+                        duration = v.duration * 1000;
+                        progress = v.currentTime * 1000;
+                        break;
+                    }
                 }
             }
 
