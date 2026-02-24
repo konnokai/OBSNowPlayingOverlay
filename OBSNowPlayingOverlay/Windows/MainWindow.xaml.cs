@@ -265,6 +265,7 @@ namespace OBSNowPlayingOverlay.Windows
                         progressColor = Color.FromRgb(255, 85, 0);
                         break;
                     case "spotify":
+                    case "spotify-api":
                         progressColor = Color.FromRgb(30, 215, 96);
                         break;
                     case "bilibili":

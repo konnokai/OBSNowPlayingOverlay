@@ -26,7 +26,7 @@
 
 - YouTube (包含 YouTube Music)
 - SoundCloud
-- Spotify (僅限網頁版，APP 因 [Web API 授權問題](https://developer.spotify.com/documentation/web-api/concepts/quota-modes)無法支援)
+- Spotify (v1.3.0 新增對 API 支援，可以獲取網頁以及 APP 的播放狀態)
 - bilibili (v1.0.5 新增，需搭配瀏覽器插件 v1.0.2.1)
 - OBS 媒體來源 (v1.1.4 新增，需搭配 [obs-websocket](https://github.com/obsproject/obs-websocket)) (通常情況下已被新版 OBS 包含在內，除非你的 OBS 版本低於 28) (由 [澪Rei](https://x.com/Reirei_Neon) 提議)
 

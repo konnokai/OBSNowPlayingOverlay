@@ -7,6 +7,8 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Media;
@@ -22,6 +24,7 @@ namespace OBSNowPlayingOverlay.Windows
     public partial class SettingWindow : Window
     {
         public static TwitchBotConfig TwitchBotConfig { get; set; } = new();
+        public static SpotifyAPIConfig SpotifyAPIConfig { get; set; } = new();
 
         private readonly MainConfig _config = new();
         private readonly MainWindow _mainWindow = new();
@@ -67,6 +70,31 @@ namespace OBSNowPlayingOverlay.Windows
                     catch { }
 
                     AnsiConsole.MarkupLine("[red]TwitchBotConfig 設定檔載入失敗，請重新登入 Twitch[/]");
+                    AnsiConsole.WriteException(ex);
+                }
+            }
+
+            if (File.Exists("SpotifyAPIConfig.bin"))
+            {
+                try
+                {
+                    var decrypted = ProtectedData.Unprotect(
+                        Convert.FromBase64String(File.ReadAllText("SpotifyAPIConfig.bin")),
+                        null,
+                        DataProtectionScope.CurrentUser
+                    );
+
+                    SpotifyAPIConfig = JsonConvert.DeserializeObject<SpotifyAPIConfig>(Encoding.UTF8.GetString(decrypted))!;
+                }
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        File.Delete("SpotifyAPIConfig.bin");
+                    }
+                    catch { }
+
+                    AnsiConsole.MarkupLine("[red]SpotifyAPIConfig 設定檔載入失敗，請重新登入 Spotify[/]");
                     AnsiConsole.WriteException(ex);
                 }
             }
@@ -205,6 +233,37 @@ namespace OBSNowPlayingOverlay.Windows
                     catch (Exception) { }
                 });
             }
+
+            if (!string.IsNullOrEmpty(SpotifyAPIConfig.ClientId) && !string.IsNullOrEmpty(SpotifyAPIConfig.ClientSecret) && SpotifyAPIConfig.AuthorizationCodeToken != null && SpotifyAPIConfig.AutoLogin)
+            {
+                Spotify.Bot.SetBotCred(SpotifyAPIConfig.ClientId, SpotifyAPIConfig.ClientSecret, SpotifyAPIConfig.AuthorizationCodeToken);
+
+                Task.Run(async () =>
+                {
+                    var userName = await Spotify.Bot.GetUserNameAsync();
+                    if (string.IsNullOrEmpty(userName))
+                    {
+                        SpotifyAPIConfig.AuthorizationCodeToken = null;
+                        SpotifyAPIConfig.UserLogin = "";
+
+                        MessageBox.Show("無法獲取 Spotify 用戶名，請確認 OAuth 相關資訊是否正確並重新登入", "錯誤", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    Spotify.Bot.StartBot();
+
+                    try
+                    {
+                        var encrypted = ProtectedData.Protect(
+                            Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(SpotifyAPIConfig, Formatting.Indented)),
+                            null, //optionalEntropy
+                            DataProtectionScope.CurrentUser
+                        );
+                        File.WriteAllText("SpotifyAPIConfig.bin", Convert.ToBase64String(encrypted));
+                    }
+                    catch (Exception) { }
+                });
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -234,6 +293,19 @@ namespace OBSNowPlayingOverlay.Windows
             try
             {
                 File.WriteAllText("TwitchBotConfig.json", JsonConvert.SerializeObject(TwitchBotConfig, Formatting.Indented));
+            }
+            catch (Exception)
+            {
+            }
+
+            try
+            {
+                var encrypted = ProtectedData.Protect(
+                    Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(SpotifyAPIConfig, Formatting.Indented)),
+                    null, //optionalEntropy
+                    DataProtectionScope.CurrentUser
+                );
+                File.WriteAllText("SpotifyAPIConfig.bin", Convert.ToBase64String(encrypted));
             }
             catch (Exception)
             {
@@ -355,6 +427,17 @@ namespace OBSNowPlayingOverlay.Windows
 
             var twitchBotWindow = new TwitchBotWindow(TwitchBotConfig);
             twitchBotWindow.ShowDialog();
+
+            _mainWindow.SetTopmost(_config.IsTopmost);
+        }
+
+        private void btn_SpotifySetting_Click(object sender, RoutedEventArgs e)
+        {
+            // 先關閉主視窗的置頂，避免 SpotifyBotSettingWindow 被遮蔽
+            _mainWindow.SetTopmost(false);
+
+            var spotifyBotSettingWindow = new SpotifyBotSettingWindow(SpotifyAPIConfig);
+            spotifyBotSettingWindow.ShowDialog();
 
             _mainWindow.SetTopmost(_config.IsTopmost);
         }
