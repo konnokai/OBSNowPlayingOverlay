@@ -126,13 +126,21 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
 
             bool wasPlaying = client.IsPlaying;
             client.LastActiveTime = DateTime.Now;
+            client.Platform = nowPlaying.Platform;
             client.IsPlaying = nowPlaying.Status == "playing";
 
             // 主動切換：如果本 client 從播放變成暫停，且目前 guid 是 LatestWebSocketGuid
             if (wasPlaying && !client.IsPlaying && Windows.MainWindow.LatestWebSocketGuid == client.Guid)
             {
-                // 主動偵測是否有其他正在播放的 client，若沒有正在播放的 client 則改為第一個偵測到的 client 並切換
-                var playingClient = _clientDict.Values.FirstOrDefault(c => c.IsPlaying) ?? _clientDict.Values.FirstOrDefault();
+                // 主動偵測是否有其他正在播放的 client，優先選擇優先級最高的正在播放的 client
+                var playingClient = _clientDict.Values
+                    .Where(c => c.IsPlaying)
+                    .OrderBy(c => c.GetPriority())
+                    .FirstOrDefault() 
+                    ?? _clientDict.Values
+                        .OrderBy(c => c.GetPriority())
+                        .FirstOrDefault();
+                
                 if (playingClient != null)
                 {
                     Windows.MainWindow.LatestWebSocketGuid = playingClient.Guid;
@@ -140,15 +148,19 @@ namespace OBSNowPlayingOverlay.WebSocketBehavior
                 // 若沒有其他 client 正在播放，則不變動 LatestWebSocketGuid
             }
 
-            // If this client is the only one playing, set it as the latest
-            // 當有兩個來源在播放時，若其中一個來源暫停，會導致條件成立
-            // 且會短暫的讓 LatestWebSocketGuid 設定為被暫停的來源，之後才會從原本持續播放的來源繼續顯示狀態
-            // 所以這邊多加個 IsPlaying 判定來確保真的是這個 client 正在播放，避免資料錯誤
-            if (_clientDict.Count(c => c.Value.IsPlaying) == 1 && client.IsPlaying)
+            // 選擇優先級最高的正在播放的 client，若只有一個正在播放則切換為該 client
+            var playingClients = _clientDict.Values.Where(c => c.IsPlaying).OrderBy(c => c.GetPriority()).ToList();
+            
+            if (playingClients.Count == 1 && client.IsPlaying)
             {
-                Windows.MainWindow.LatestWebSocketGuid = client.Guid;
+                Windows.MainWindow.LatestWebSocketGuid = playingClients[0].Guid;
             }
-
+            else if (playingClients.Count > 1)
+            {
+                // 有多個正在播放時，選擇優先級最高的
+                Windows.MainWindow.LatestWebSocketGuid = playingClients[0].Guid;
+            }
+            
             try
             {
                 Windows.MainWindow.MsgQueue.TryAdd(nowPlaying);
