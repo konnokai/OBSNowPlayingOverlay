@@ -65,7 +65,13 @@ namespace OBSNowPlayingOverlay.Spotify
                 var currentlyPlaying = Newtonsoft.Json.JsonConvert.DeserializeObject<CurrentlyPlayingTrack>(client.LastResponse.Body!.ToString()!);
                 return currentlyPlaying;
             }
-            catch (APIException ex)
+            catch (APITooManyRequestsException ex)
+            {
+                isRunning = false;
+                AnsiConsole.MarkupLineInterpolated($"[red]觸發 429 錯誤，將暫停 Spotify Bot，請於 {ex.RetryAfter:hh\\:mm\\:ss} 後重新開啟[/]");
+                return null;
+            }
+            catch (Exception ex)
             {
                 AnsiConsole.WriteException(ex);
                 return null;
@@ -101,7 +107,7 @@ namespace OBSNowPlayingOverlay.Spotify
                             SongLink = track.Item.Album.ExternalUrls.Spotify,
                         });
                     }
-                    await Task.Delay(500);
+                    await Task.Delay(2000);
                 } while (isRunning);
             });
         }
